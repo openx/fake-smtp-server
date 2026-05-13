@@ -30,40 +30,31 @@
     "fake-smtp-server": "./index.js"
   },
   "dependencies": {
-    "cli": "1.0.1",
-    "express": "4.22.0",
-    "express-basic-auth": "1.1.7",
-    "lodash": "4.17.23",
-    "mailparser": "2.8.1",
-    "moment": "2.29.4",
-    "smtp-server": "3.5.0"
+    "commander": "14.0.3",
+    "dayjs": "1.11.20",
+    "express": "5.2.1",
+    "express-basic-auth": "1.2.1",
+    "mailparser": "3.9.8",
+    "smtp-server": "3.18.4"
   },
   "devDependencies": {
-    "react": "16.8.3",
-    "react-dom": "16.8.3",
-    "react-scripts": "5.0.1",
-    "react-transition-group": "2.6.0",
-    "reactstrap": "7.1.0",
-    "nodemailer": "7.0.10"
+    "@vitejs/plugin-react": "6.0.1",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "reactstrap": "9.2.3",
+    "vite": "8.0.12"
   },
   "engines": {
-    "node": ">=8.5.0"
+    "node": ">=22.0.0"
   },
   "files": [
     "build"
   ],
   "scripts": {
-    "start": "react-scripts start",
-    "build": "PUBLIC_URL=./ react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "prepublishOnly": "npm run build",
     "docker:build": "docker build -t openx/fake-smtp-server ."
-  },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ]
+  }
 }

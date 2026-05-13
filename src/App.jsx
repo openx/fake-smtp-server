@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import {
   Button,
   Container,
@@ -10,7 +10,12 @@ import {
   ListGroup,
   ListGroupItem
 } from 'reactstrap';
-import moment from 'moment';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+
+dayjs.extend(relativeTime);
+dayjs.extend(localizedFormat);
 
 function openAttachment (attachment) {
   var byteArray = new Uint8Array(attachment.content.data);
@@ -51,7 +56,7 @@ const Email = ({ email, isOpen, onToggle }) => {
           </ListGroupItem>
           <ListGroupItem>
             <strong>Date:&nbsp;</strong>
-            <span title={moment(email.date).format('lll')}>{moment(email.date).fromNow()}</span>
+            <span title={dayjs(email.date).format('lll')}>{dayjs(email.date).fromNow()}</span>
           </ListGroupItem>
           <ListGroupItem>
             <strong>Subject:&nbsp;</strong>
@@ -61,7 +66,7 @@ const Email = ({ email, isOpen, onToggle }) => {
             <b>Attachments: </b>
             <div>
               {email.attachments.map(attachment => (
-                <Button size="sm" className="mr-1" onClick={() => openAttachment(attachment)}>
+                <Button size="sm" className="me-1" onClick={() => openAttachment(attachment)}>
                   {attachment.filename}
                 </Button>
               ))}
@@ -80,7 +85,7 @@ function removeTrailingSlash(url) {
   return url.replace(/\/$/, "");
 }
 
-const baseUrl = process.env.NODE_ENV === 'development'
+const baseUrl = import.meta.env.DEV
   ? 'http://localhost:1080'
   : removeTrailingSlash(`${window.location.origin}${window.location.pathname}`);
 
