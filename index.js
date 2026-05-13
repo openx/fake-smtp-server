@@ -4,27 +4,30 @@ const simpleParser = require('mailparser').simpleParser;
 const express = require("express");
 const basicAuth = require('express-basic-auth');
 const path = require("path");
-const _ = require("lodash");
-const moment = require("moment");
-const cli = require('cli').enable('catchall').enable('status');
+const dayjs = require("dayjs");
+const { program, Option } = require('commander');
 
-const config = cli.parse({
-  'smtp-port': ['s', 'SMTP port to listen on', 'number', 1025],
-  'smtp-ip': [false, 'IP Address to bind SMTP service to', 'ip', '0.0.0.0'],
-  'http-port': ['h', 'HTTP port to listen on', 'number', 1080],
-  'http-ip': [false, 'IP Address to bind HTTP service to', 'ip', '0.0.0.0'],
-  whitelist: ['w', 'Only accept e-mails from these adresses. Accepts multiple e-mails comma-separated', 'string'],
-  max: ['m', 'Max number of e-mails to keep', 'number', 100],
-  auth: ['a', 'Enable Authentication', 'string'],
-  headers: [false, 'Enable headers in responses']
-});
+program
+  .name('fake-smtp-server')
+  .helpOption('--help', 'display help')
+  .option('-s, --smtp-port <number>', 'SMTP port to listen on', Number, 1025)
+  .option('--smtp-ip <ip>', 'IP Address to bind SMTP service to', '0.0.0.0')
+  .addOption(new Option('-h, --http-port <number>', 'HTTP port to listen on').argParser(Number).default(1080))
+  .option('--http-ip <ip>', 'IP Address to bind HTTP service to', '0.0.0.0')
+  .option('-w, --whitelist <emails>', 'Only accept e-mails from these addresses. Accepts multiple e-mails comma-separated')
+  .option('-m, --max <number>', 'Max number of e-mails to keep', Number, 100)
+  .option('-a, --auth <user:pass>', 'Enable Authentication')
+  .option('--headers', 'Enable headers in responses')
+  .parse();
+
+const config = program.opts();
 
 const whitelist = config.whitelist ? config.whitelist.split(',') : [];
 
 let users = null;
 if (config.auth && !/.+:.+/.test(config.auth)) {
-    cli.error("Please provide authentication details in USERNAME:PASSWORD format");
-    console.log(process.exit(1))
+  console.error("Please provide authentication details in USERNAME:PASSWORD format");
+  process.exit(1);
 }
 if (config.auth) {
   let authConfig = config.auth.split(":");
@@ -45,7 +48,7 @@ const server = new SMTPServer({
     }
   },
   onAuth(auth, session, callback) {
-    cli.info('SMTP login for user: ' + auth.username);
+    console.log('SMTP login for user: ' + auth.username);
     callback(null, {
       user: auth.username
     });
@@ -53,7 +56,7 @@ const server = new SMTPServer({
   onData(stream, session, callback) {
     parseEmail(stream).then(
       mail => {
-        cli.debug(JSON.stringify(mail, null, 2));
+        console.debug(JSON.stringify(mail, null, 2));
 
         mails.unshift(mail);
 
@@ -89,10 +92,10 @@ function parseEmail(stream) {
 }
 
 server.on('error', err => {
-  cli.error(err);
+  console.error(err);
 });
 
-server.listen(config['smtp-port'], config['smtp-ip']);
+server.listen(config.smtpPort, config.smtpIp);
 
 const app = express();
 
@@ -116,7 +119,7 @@ app.use(express.static(buildDir));
 function emailFilter(filter) {
   return email => {
     if (filter.since || filter.until) {
-      const date = moment(email.date);
+      const date = dayjs(email.date);
       if (filter.since && date.isBefore(filter.since)) {
         return false;
       }
@@ -125,11 +128,11 @@ function emailFilter(filter) {
       }
     }
 
-    if (filter.to && _.every(email.to.value, to => to.address !== filter.to)) {
+    if (filter.to && email.to.value.every(to => to.address !== filter.to)) {
       return false;
     }
 
-    if (filter.from && _.every(email.from.value, from => from.address !== filter.from)) {
+    if (filter.from && email.from.value.every(from => from.address !== filter.from)) {
       return false;
     }
 
@@ -146,8 +149,8 @@ app.delete('/api/emails', (req, res) => {
     res.send();
 });
 
-app.listen(config['http-port'], config['http-ip'], () => {
-  cli.info("HTTP server listening on http://" + config['http-ip'] +  ":" + config['http-port']);
+app.listen(config.httpPort, config.httpIp, () => {
+  console.log("HTTP server listening on http://" + config.httpIp + ":" + config.httpPort);
 });
 
-cli.info("SMTP server listening on " + config['smtp-ip'] + ":" + config['smtp-port']);
+console.log("SMTP server listening on " + config.smtpIp + ":" + config.smtpPort);
