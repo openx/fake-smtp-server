@@ -1,0 +1,48 @@
+timeout: 600s
+
+substitutions:
+  _IMAGE_NAME: us-central1-docker.pkg.dev/ox-registry-prod/aq/fake-smtp-server
+
+steps:
+  - id: extract-version
+    name: node:22-alpine
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        set -e
+        VERSION=$$(node -p "require('./package.json').version")
+        echo "export VERSION=$$VERSION" > /workspace/_vars.sh
+        cat /workspace/_vars.sh
+
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    waitFor: ['extract-version']
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        source /workspace/_vars.sh
+        docker build \
+          -t $_IMAGE_NAME:$SHORT_SHA \
+          -t $_IMAGE_NAME:$$VERSION \
+          .
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    waitFor: ['build']
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        if ! [[ "$BRANCH_NAME" =~ ^(master|main)$ ]]; then
+          echo "Skipping push (branch=$BRANCH_NAME)"
+          exit 0
+        fi
+        source /workspace/_vars.sh
+        docker push $_IMAGE_NAME:$SHORT_SHA
+        docker push $_IMAGE_NAME:$$VERSION
+        docker tag $_IMAGE_NAME:$SHORT_SHA $_IMAGE_NAME:latest
+        docker push $_IMAGE_NAME:latest
