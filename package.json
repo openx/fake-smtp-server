@@ -1,6 +1,6 @@
 {
   "name": "fake-smtp-server",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "Fake SMTP Server for email testing",
   "author": "OpenX",
   "license": "MIT",

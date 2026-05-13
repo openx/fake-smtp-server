@@ -24,6 +24,22 @@ function openAttachment (attachment) {
   window.open(fileURL);
 }
 
+const AddressList = ({ addrs }) => (
+  <>
+    {addrs.map((addr, i) => (
+      <span key={i}>
+        {i > 0 && ', '}
+        {addr.name ? `${addr.name} ` : ''}
+        &lt;<a href={`mailto:${addr.address}`}>{addr.address}</a>&gt;
+      </span>
+    ))}
+  </>
+);
+
+function bodySrcDoc(html) {
+  return `<!doctype html><html><head><meta charset="utf-8"><base target="_blank"></head><body>${html || ''}</body></html>`;
+}
+
 const Email = ({ email, isOpen, onToggle }) => {
   let from = email.from.value[0];
   let to = email.to.value[0];
@@ -48,11 +64,11 @@ const Email = ({ email, isOpen, onToggle }) => {
         <ListGroup className="list-group-flush">
           <ListGroupItem>
             <strong>From:&nbsp;</strong>
-            <span dangerouslySetInnerHTML={{ __html: email.from.html }} />
+            <AddressList addrs={email.from.value} />
           </ListGroupItem>
           <ListGroupItem>
             <strong>To:&nbsp;</strong>
-            <span dangerouslySetInnerHTML={{ __html: email.to.html }} />
+            <AddressList addrs={email.to.value} />
           </ListGroupItem>
           <ListGroupItem>
             <strong>Date:&nbsp;</strong>
@@ -73,8 +89,13 @@ const Email = ({ email, isOpen, onToggle }) => {
             </div>
           </ListGroupItem>
         </ListGroup>
-        <div className="card-body">
-          <div dangerouslySetInnerHTML={{ __html: email.html || email.textAsHtml }} />
+        <div className="card-body p-0">
+          <iframe
+            sandbox="allow-popups allow-popups-to-escape-sandbox"
+            srcDoc={bodySrcDoc(email.html || email.textAsHtml)}
+            title="Email body"
+            style={{ width: '100%', height: '400px', border: 0 }}
+          />
         </div>
       </Collapse>
     </Card>
