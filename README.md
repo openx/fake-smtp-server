@@ -5,7 +5,20 @@ Fake SMTP Server is an email testing tool for QA & development teams.
 It allows manual testing in a web interface, and automated testing via an API.
 
 ## Docker image
-[reachfive/fake-smtp-server](https://hub.docker.com/r/reachfive/fake-smtp-server)
+
+Published to OpenX's GCP Artifact Registry from this repo's [`cloudbuild.yaml`](cloudbuild.yaml) (master pushes only):
+
+```
+us-central1-docker.pkg.dev/ox-registry-prod/aq/fake-smtp-server:<version>
+```
+
+Available tags: the `package.json` version (e.g. `1.0.0`), the source commit's short SHA, and `latest`.
+
+To pull, authenticate Docker against the Artifact Registry host first:
+
+```sh
+gcloud auth configure-docker us-central1-docker.pkg.dev
+```
 
 ## API
 
