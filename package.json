@@ -42,7 +42,7 @@
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "reactstrap": "9.2.3",
-    "vite": "8.0.12"
+    "vite": "8.0.16"
   },
   "engines": {
     "node": ">=22.0.0"
