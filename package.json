@@ -34,7 +34,7 @@
     "dayjs": "1.11.20",
     "express": "5.2.1",
     "express-basic-auth": "1.2.1",
-    "mailparser": "3.9.8",
+    "mailparser": "3.9.14",
     "smtp-server": "3.18.4"
   },
   "devDependencies": {
